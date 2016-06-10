@@ -1,2 +1,3 @@
-# data-visualization-demos
-Some data visualization demonstrations
+# Data Visualization Demos
+
+Some browser data visualization demonstrations.
