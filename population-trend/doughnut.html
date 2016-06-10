@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="d3.v3.min.js"></script>
+    <title>Doughnut</title>
+</head>
+<body>
+<div id="doughnut"></div>
+<script>
+    (function (d3) {
+        var data = [53245, 19697, 24037, 40245];
+
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        var radius = Math.min(width, height) / 2;
+
+        var svg = d3.select("#doughnut")
+                .append("svg").attr("width", width).attr("height", height)
+                .append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        var pie = d3.layout.pie();
+
+        var arc = d3.svg.arc().innerRadius(0.4 * radius).outerRadius(0.8 * radius);
+
+        // Store one category instead of creating many.
+        var color = d3.scale.category10();
+
+        var path = svg.selectAll('path')
+                .data(pie(data))
+                .enter()
+                .append('path')
+                .attr('d', arc)
+                .attr('fill', function (d) {
+                    return color(d.data);
+                });
+    })(window.d3);
+</script>
+</body>
+</html>
