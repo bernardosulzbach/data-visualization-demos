@@ -3,30 +3,37 @@
 <head>
     <meta charset='UTF-8'>
     <script src='d3.v3.min.js'></script>
-    <title>Doughnut</title>
+    <title>Population Trends</title>
 </head>
 <body>
 <div id='doughnut'></div>
 <script>
     (function (d3) {
+        /**
+         * An array of country objects sorted by current population in non-ascending order.
+         */
         var data = [];
         var data_year = 2015;
         var data_is_available = false;
-        d3.json('processed.json', function (records) {
-            records.sort(function (a, b) { // Reversed natural ordering on current population
-                if (a['current'] < b['current']) {
-                    return 1;
-                } else if (a['current'] == b['current']) {
-                    return 0;
-                } else {
-                    return -1;
-                }
-            });
-            records.forEach(function (record) {
-                data.push(record);
-            });
-            data_is_available = true;
-            draw();
+
+        function compare_countries_by_population(a, b) { // Reversed natural ordering on current population
+            if (a['current'] < b['current']) {
+                return -1;
+            } else if (a['current'] == b['current']) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+
+        d3.json('processed.json', function (error, countries) {
+            if (error) {
+                console.log(error);
+            } else {
+                data = countries.sort(compare_countries_by_population).reverse();
+                data_is_available = true;
+                draw();
+            }
         });
 
         /**
@@ -37,6 +44,8 @@
                 country['current'] = Math.pow(country['trend'], year_count) * country['current'];
                 return country;
             });
+            // Keep the data sorted for the drawing functions.
+            data = data.sort(compare_countries_by_population).reverse();
             return data;
         }
 
