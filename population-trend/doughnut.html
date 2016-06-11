@@ -10,6 +10,7 @@
 <script>
     (function (d3) {
         var data = [];
+        var data_year = 2015;
         var data_is_available = false;
         d3.json('processed.json', function (records) {
             records.sort(function (a, b) { // Reversed natural ordering on current population
@@ -44,7 +45,8 @@
         function draw() {
             var width = window.innerWidth;
             var height = window.innerHeight;
-            var radius = Math.min(width, height) / 2;
+            var outer_radius = Math.min(width, height) * 0.4;
+            var inner_radius = 0.5 * outer_radius;
             // Remove the old SVG, if it exists
             d3.select('svg').remove();
             var svg = d3.select('#doughnut')
@@ -55,7 +57,7 @@
                 return d.current;
             }).sort(null);
 
-            var arc = d3.svg.arc().innerRadius(0.4 * radius).outerRadius(0.8 * radius);
+            var arc = d3.svg.arc().innerRadius(inner_radius).outerRadius(outer_radius);
 
             // Store one category instead of creating many.
             var color = d3.scale.category20b();
@@ -72,13 +74,20 @@
                 'labels': ['Others', null],
                 'trend': NaN // We do not compute this value.
             });
-            var path = svg.selectAll('path')
-                    .data(pie(processed_data))
-                    .enter()
+            var path = svg.selectAll('path').data(pie(processed_data)).enter()
                     .append('path')
                     .attr('d', arc)
                     .attr('fill', function (d) {
                         return color(d.data['labels'][1]);
+                    });
+            svg.selectAll('text').data([data_year]).enter()
+                    .append('text')
+                    .attr('text-anchor', 'middle') // Center horizontally
+                    .attr('alignment-baseline', 'central') // Center vertically
+                    .attr('font-family', 'sans-serif')
+                    .attr('font-size', Math.floor(inner_radius / 2) + 'px') // Set a relative font-size
+                    .text(function () {
+                        return data_year;
                     });
         }
 
@@ -95,6 +104,7 @@
 
         setInterval(function () {
             data = interpolate_data(data, 1);
+            data_year += 1;
             redraw();
         }, 1000); // Increase year count after 1 second
     })(window.d3);
