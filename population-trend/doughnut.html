@@ -12,13 +12,13 @@
         var data = [];
         var data_is_available = false;
         d3.json('processed.json', function (records) {
-            records.sort(function (a, b) {
+            records.sort(function (a, b) { // Reversed natural ordering on current population
                 if (a['current'] < b['current']) {
-                    return -1;
+                    return 1;
                 } else if (a['current'] == b['current']) {
                     return 0;
                 } else {
-                    return 1;
+                    return -1;
                 }
             });
             records.forEach(function (currentValue) {
@@ -40,15 +40,23 @@
                     .append('svg').attr('width', width).attr('height', height)
                     .append('g').attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-            var pie = d3.layout.pie();
+            var pie = d3.layout.pie().sort(null);
 
             var arc = d3.svg.arc().innerRadius(0.4 * radius).outerRadius(0.8 * radius);
 
             // Store one category instead of creating many.
             var color = d3.scale.category20b();
 
+            var represented_country_count = 64;
+            var processed_data = data.slice(0, represented_country_count);
+            var unrepresented_current_population = 0;
+            data.slice(represented_country_count).forEach(function (current) {
+                unrepresented_current_population += current;
+            });
+            processed_data.push(unrepresented_current_population);
+
             var path = svg.selectAll('path')
-                    .data(pie(data))
+                    .data(pie(processed_data))
                     .enter()
                     .append('path')
                     .attr('d', arc)
